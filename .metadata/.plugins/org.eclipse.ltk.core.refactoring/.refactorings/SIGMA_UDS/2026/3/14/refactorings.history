@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Rename resource &apos;bootloader/Core/Src/uds_read_DID&apos; to &apos;uds_read_DID.c&apos;" description="Rename resource &apos;uds_read_DID&apos;" flags="7" id="org.eclipse.ltk.core.refactoring.rename.resource" input="Core/Src/uds_read_DID" name="uds_read_DID.c" stamp="1774992843463" updateReferences="true"/>
+</session>

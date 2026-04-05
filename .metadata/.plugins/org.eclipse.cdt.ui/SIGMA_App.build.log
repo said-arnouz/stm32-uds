@@ -1,0 +1,10 @@
+20:36:13 **** Incremental Build of configuration Debug for project SIGMA_App ****
+make -j8 all 
+arm-none-eabi-size   SIGMA_App.elf 
+   text	   data	    bss	    dec	    hex	filename
+   7908	     20	   1636	   9564	   255c	SIGMA_App.elf
+Finished building: default.size.stdout
+ 
+
+20:36:14 Build Finished. 0 errors, 0 warnings. (took 494ms)
+

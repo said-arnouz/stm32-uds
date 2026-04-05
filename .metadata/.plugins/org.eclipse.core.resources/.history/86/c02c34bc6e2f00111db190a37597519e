@@ -1,0 +1,80 @@
+/*
+ * uds.c  –  UDS request router  –  FIXED
+ *
+ * Changes vs original:
+ *  - UDS_IsServiceAllowed() now called before dispatching
+ *  - UDS_ResetSecurity() called on session change (see uds_session.c)
+ *  - 0x34/0x36/0x37 only reachable in Programming session
+ */
+
+#include "uds.h"
+#include "uds_nrc.h"
+#include "uds_types.h"
+#include "isotp.h"
+
+/* ── NRC helper ──────────────────────────────────────────────────────── */
+void UDS_SendNRC(uint8_t sid, uint8_t nrc)
+{
+    uint8_t resp[3] = {0x7F, sid, nrc};
+    ISO_TP_Send(resp, 3);
+}
+
+/* ── Service allow-list per mode ─────────────────────────────────────── */
+static uint8_t UDS_IsServiceAllowed(uint8_t sid)
+{
+    if (ecuMode == ECU_BOOTLOADER)
+    {
+        /* Bootloader only accepts programming-related services */
+        return (sid == 0x10 ||
+                sid == 0x11 ||
+                sid == 0x27 ||
+                sid == 0x2E ||
+                sid == 0x34 ||
+                sid == 0x36 ||
+                sid == 0x37);
+    }
+    else /* ECU_APPLICATION */
+    {
+        return (sid == 0x10 ||
+                sid == 0x11 ||
+                sid == 0x22);
+    }
+}
+
+/* ── Main request router ─────────────────────────────────────────────── */
+void UDS_Process(uint8_t *req, uint16_t len)
+{
+    if (len == 0) return;
+
+    uint8_t sid = req[0];
+
+    /* Gate 1 – service allowed in current mode? */
+    if (!UDS_IsServiceAllowed(sid))
+    {
+        UDS_SendNRC(sid, NRC_SERVICE_NOT_SUPPORTED);
+        return;
+    }
+
+    /* Gate 2 – 0x34/0x36/0x37 require programming session */
+    if ((sid == 0x34 || sid == 0x36 || sid == 0x37) &&
+        (currentSession != SESSION_PROGRAMMING))
+    {
+        UDS_SendNRC(sid, NRC_CONDITIONS_NOT_CORRECT);
+        return;
+    }
+
+    switch (sid)
+    {
+        case 0x10: UDS_Session(req, len);             break;
+        case 0x11: UDS_Reset(req, len);               break;
+        case 0x27: UDS_Security(req, len);            break;
+        case 0x22: UDS_ReadDID(req, len);             break;
+        case 0x2E: UDS_WriteDID(req, len);            break;
+        case 0x34: UDS_RequestDownload(req, len);     break;
+        case 0x36: UDS_TransferData(req, len);        break;
+        case 0x37: UDS_RequestTransferExit(req, len); break;
+
+        default:
+            UDS_SendNRC(sid, NRC_SERVICE_NOT_SUPPORTED);
+    }
+}

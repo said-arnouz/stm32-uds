@@ -1,0 +1,33 @@
+/*
+ * uds_writ_DID.c
+ *
+ *  Created on: 31 mar. 2026
+ *      Author: HP
+ */
+
+#include "flash_if.h"
+#include "uds.h"
+
+
+void UDS_WriteDID(uint8_t *req, uint16_t len)
+{
+	uint8_t unlocked =  UDS_Security(*req, len);
+
+    if (!unlocked)
+        return UDS_SendNRC(0x2E, 0x33);
+
+    uint16_t did = (req[1] << 8) | req[2];
+
+    if (did == 0xF1A0)
+    {
+        Flash_Erase(0x08020000);
+        Flash_Write(0x08020000, &req[3], len - 3);
+
+        uint8_t resp[3] = {0x6E, req[1], req[2]};
+        ISO_TP_Send(resp, 3);
+    }
+    else
+    {
+        UDS_SendNRC(0x2E, 0x31);
+    }
+}

@@ -1,0 +1,149 @@
+/*
+ * isotp.c  –  ISO-TP (ISO 15765-2) layer  –  FIXED
+ *
+ * Changes vs original:
+ *  - Removed dead ISO_TP_Receive() / duplicate tp_rx context
+ *  - Removed misplaced UDS_ProcessRequest() / UDS_IsServiceAllowed()
+ *    (those belong in uds.c / uds_session.c)
+ *  - Single rx_ctx used throughout ISO_TP_ProcessFrame()
+ *  - Sequence number validation kept in CF path
+ */
+
+#include "isotp.h"
+#include "uds.h"
+#include "flash_if.h"
+#include "string.h"
+
+extern UART_HandleTypeDef huart2;
+
+static ISO_TP_Context_t rx_ctx;   /* single RX reassembly context */
+
+/* ── init ─────────────────────────────────────────────────────────────── */
+void ISO_TP_Init(void)
+{
+    memset(&rx_ctx, 0, sizeof(rx_ctx));
+}
+
+/* ── low-level TX ─────────────────────────────────────────────────────── */
+void ISO_TP_SendFrame(uint8_t *frame)
+{
+    HAL_UART_Transmit(&huart2, frame, ISO_TP_FRAME_SIZE, HAL_MAX_DELAY);
+}
+
+/* ── Flow Control (CTS) ───────────────────────────────────────────────── */
+void ISO_TP_SendFC(void)
+{
+    uint8_t frame[ISO_TP_FRAME_SIZE] = {0};
+    frame[0] = ISO_TP_FC | 0x00;  /* CTS */
+    frame[1] = 0x00;               /* BS – no block limit  */
+    frame[2] = 0x00;               /* STmin – no delay     */
+    ISO_TP_SendFrame(frame);
+}
+
+/* ── Multi/Single-frame TX ────────────────────────────────────────────── */
+void ISO_TP_Send(uint8_t *data, uint16_t len)
+{
+    uint8_t frame[ISO_TP_FRAME_SIZE] = {0};
+
+    if (len <= 7)
+    {
+        /* ── Single Frame ── */
+        frame[0] = ISO_TP_SF | (uint8_t)len;
+        memcpy(&frame[1], data, len);
+        ISO_TP_SendFrame(frame);
+    }
+    else
+    {
+        /* ── First Frame ── */
+        frame[0] = ISO_TP_FF | (uint8_t)((len >> 8) & 0x0F);
+        frame[1] = (uint8_t)(len & 0xFF);
+        memcpy(&frame[2], data, 6);
+        ISO_TP_SendFrame(frame);
+
+        HAL_Delay(1);
+
+        /* ── Consecutive Frames ── */
+        uint16_t index = 6;
+        uint8_t  sn    = 1;
+
+        while (index < len)
+        {
+            uint8_t chunk = (len - index > 7) ? 7 : (uint8_t)(len - index);
+            memset(frame, 0, ISO_TP_FRAME_SIZE);
+            frame[0] = ISO_TP_CF | (sn & 0x0F);
+            memcpy(&frame[1], &data[index], chunk);
+            ISO_TP_SendFrame(frame);
+
+            index += chunk;
+            sn     = (sn + 1) & 0x0F;
+            HAL_Delay(1);
+        }
+    }
+}
+
+/* ── RX frame dispatcher ─────────────────────────────────────────────── */
+void ISO_TP_ProcessFrame(uint8_t *frame)
+{
+    uint8_t pci_type = frame[0] & 0xF0;
+
+    switch (pci_type)
+    {
+        /* ── Single Frame ── */
+        case ISO_TP_SF:
+        {
+            uint8_t len = frame[0] & 0x0F;
+            if (len == 0 || len > 7) break;          /* sanity check */
+
+            memcpy(rx_ctx.buffer, &frame[1], len);
+            rx_ctx.length = len;
+
+            UDS_Process(rx_ctx.buffer, len);
+        } break;
+
+        /* ── First Frame ── */
+        case ISO_TP_FF:
+        {
+            uint16_t total = (uint16_t)((frame[0] & 0x0F) << 8) | frame[1];
+            if (total > ISO_TP_MAX_PAYLOAD) break;   /* payload too large */
+
+            memset(&rx_ctx, 0, sizeof(rx_ctx));
+            rx_ctx.length          = total;
+            rx_ctx.index           = 6;
+            rx_ctx.sequence_number = 1;
+            memcpy(rx_ctx.buffer, &frame[2], 6);
+
+            ISO_TP_SendFC();
+        } break;
+
+        /* ── Consecutive Frame ── */
+        case ISO_TP_CF:
+        {
+            uint8_t sn = frame[0] & 0x0F;
+
+            if (sn != (rx_ctx.sequence_number & 0x0F))
+                break;   /* sequence error – discard */
+
+            rx_ctx.sequence_number++;
+
+            uint16_t remaining = rx_ctx.length - rx_ctx.index;
+            uint8_t  copy_len  = (remaining > 7) ? 7 : (uint8_t)remaining;
+
+            memcpy(&rx_ctx.buffer[rx_ctx.index], &frame[1], copy_len);
+            rx_ctx.index += copy_len;
+
+            if (rx_ctx.index >= rx_ctx.length)
+            {
+                UDS_Process(rx_ctx.buffer, rx_ctx.length);
+                memset(&rx_ctx, 0, sizeof(rx_ctx));
+            }
+        } break;
+
+        /* ── Flow Control (host→ECU, if ECU ever sends multi-frame first) ── */
+        case ISO_TP_FC:
+            /* not needed for bootloader – ECU is always the responder */
+            break;
+
+        default:
+            break;
+    }
+}

@@ -1,0 +1,7 @@
+1775391611558	Rename resource 'bootloader'
+1775391656357	Rename resource 'App'
+1775423341470	Delete resource 'SIGMA_App'
+1775423386158	Rename resource 'SIGMA_bootloader'
+1775423434847	Delete resource 'SIGMA_UDS/Core/Inc/SIGMA_flash_if.h'
+1775423440743	Delete resource 'SIGMA_UDS/Core/Src/SIGMA_flash_if.c'
+1775425202302	Delete resource 'SIGMA_UDS/Core/Inc/SIGMA_UDS.h'

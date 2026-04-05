@@ -1,0 +1,20 @@
+/*
+ * uds_nrc.h
+ *
+ *  Created on: 31 mar. 2026
+ *      Author: HP
+ */
+
+#ifndef UDS_NRC_H
+#define UDS_NRC_H
+
+#define NRC_GENERAL_REJECT            0x10
+#define NRC_SERVICE_NOT_SUPPORTED     0x11
+#define NRC_SUBFUNCTION_NOT_SUPPORTED 0x12
+#define NRC_INCORRECT_LENGTH          0x13
+#define NRC_CONDITIONS_NOT_CORRECT    0x22
+#define NRC_REQUEST_OUT_OF_RANGE      0x31
+#define NRC_SECURITY_ACCESS_DENIED    0x33
+#define NRC_INVALID_KEY               0x35
+
+#endif /* INC_UDS_NRC_H_ */

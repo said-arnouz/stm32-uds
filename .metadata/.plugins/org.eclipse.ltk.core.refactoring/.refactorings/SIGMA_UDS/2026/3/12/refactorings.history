@@ -1,0 +1,3 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">&#x0A;<refactoring comment="Rename resource &apos;bootloader/Core/Inc/uds.h&apos; to &apos;uds_control_session.h&apos;" description="Rename resource &apos;uds.h&apos;" flags="7" id="org.eclipse.ltk.core.refactoring.rename.resource" input="Core/Inc/uds.h" name="uds_control_session.h" stamp="1773881003190" updateReferences="true"/>&#x0A;<refactoring comment="Rename resource &apos;bootloader/Core/Src/uds.c&apos; to &apos;uds_controll_session.c&apos;" description="Rename resource &apos;uds.c&apos;" flags="7" id="org.eclipse.ltk.core.refactoring.rename.resource" input="Core/Src/uds.c" name="uds_controll_session.c" stamp="1773881088806" updateReferences="true"/>
+</session>

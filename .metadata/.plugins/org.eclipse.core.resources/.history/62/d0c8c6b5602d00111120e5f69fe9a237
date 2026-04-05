@@ -1,0 +1,34 @@
+/*
+ * uds.h
+ *
+ *  Created on: 31 mar. 2026
+ *      Author: HP
+ */
+
+#ifndef UDS_H
+#define UDS_H
+
+#include <stdint.h>
+
+/* ================= CORE ================= */
+void UDS_Process(uint8_t *req, uint16_t len);
+
+/* ================= RESPONSE ================= */
+void UDS_SendNRC(uint8_t sid, uint8_t nrc);
+
+/* ================= SERVICES ================= */
+void UDS_Session(uint8_t *req, uint16_t len);        // 0x10
+void UDS_Reset(uint8_t *req, uint16_t len);          // 0x11
+void UDS_Security(uint8_t *req, uint16_t len);       // 0x27
+void UDS_ReadDID(uint8_t *req, uint16_t len);        // 0x22
+void UDS_WriteDID(uint8_t *req, uint16_t len);       // 0x2E
+
+/* ================= FLASHING ================= */
+void UDS_RequestDownload(uint8_t *req, uint16_t len);     // 0x34
+void UDS_TransferData(uint8_t *req, uint16_t len);        // 0x36
+void UDS_RequestTransferExit(uint8_t *req, uint16_t len); // 0x37
+void UDS_ProcessRequest(uint8_t *req, uint16_t len);
+/* ================= SECURITY ================= */
+uint8_t UDS_IsUnlocked(void);
+
+#endif /* INC_UDS_H_ */

@@ -1,0 +1,83 @@
+/*
+ * uds_security.c
+ *
+ *  Security algorithm: key = seed XOR 0xDEADBEEF
+ *  Must match the Python host (SECURITY_XOR_MASK = 0xDEADBEEF).
+ */
+
+#include "isotp.h"
+#include "uds.h"
+#include "uds_nrc.h"
+#include "string.h"
+
+/* ── security algorithm ─────────────────────────────────────────────────── */
+#define SECURITY_XOR_MASK  0xDEADBEEFUL
+
+/* fixed seed – in production replace with HAL_GetTick() or HW RNG */
+static const uint8_t seed[4] = {0x11, 0x22, 0x33, 0x44};
+static uint8_t unlocked = 0;
+
+/* Compute expected key from seed bytes */
+static uint32_t compute_key(const uint8_t *s)
+{
+    uint32_t seed_u32 = ((uint32_t)s[0] << 24)
+                      | ((uint32_t)s[1] << 16)
+                      | ((uint32_t)s[2] <<  8)
+                      |  (uint32_t)s[3];
+    return seed_u32 ^ SECURITY_XOR_MASK;
+}
+
+/* ── SID 0x27 ───────────────────────────────────────────────────────────── */
+void UDS_Security(uint8_t *req, uint16_t len)
+{
+    if (len < 2)
+        return UDS_SendNRC(0x27, NRC_INCORRECT_LENGTH);
+
+    uint8_t sub = req[1];
+
+    switch (sub)
+    {
+        case 0x01: /* requestSeed */
+        {
+            uint8_t resp[6] = {0x67, 0x01,
+                               seed[0], seed[1], seed[2], seed[3]};
+            ISO_TP_Send(resp, 6);
+        } break;
+
+        case 0x02: /* sendKey */
+        {
+            if (len < 6)
+                return UDS_SendNRC(0x27, NRC_INCORRECT_LENGTH);
+
+            /* Reconstruct received key (big-endian, 4 bytes at req[2..5]) */
+            uint32_t rcvd_key = ((uint32_t)req[2] << 24)
+                              | ((uint32_t)req[3] << 16)
+                              | ((uint32_t)req[4] <<  8)
+                              |  (uint32_t)req[5];
+
+            if (rcvd_key == compute_key(seed))
+            {
+                unlocked = 1;
+                uint8_t resp[2] = {0x67, 0x02};
+                ISO_TP_Send(resp, 2);
+            }
+            else
+            {
+                UDS_SendNRC(0x27, NRC_INVALID_KEY);
+            }
+        } break;
+
+        default:
+            UDS_SendNRC(0x27, NRC_SUBFUNCTION_NOT_SUPPORTED);
+    }
+}
+
+uint8_t UDS_IsUnlocked(void)
+{
+    return unlocked;
+}
+
+void UDS_ResetSecurity(void)
+{
+    unlocked = 0;
+}
