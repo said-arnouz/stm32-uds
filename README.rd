@@ -3,8 +3,11 @@
 > UART-based UDS (Unified Diagnostic Services) bootloader implemented on STM32F411RE Nucleo board, with a Python host terminal.
 
 ---
+
 ### Python Host Terminal
 ![HOST](images/HOST.PNG)
+
+---
 
 ## Hardware
 
@@ -108,15 +111,36 @@ key = seed_H ^ seed_L
 | 0xF186 | Active Session | `0x01` or `0x02` |
 
 ```
-TX: [02][22][F1][86]  →  RX: [04][62][F1][86][01]   Default session
-TX: [04][22][F1][86][F1][93]  →  RX: [03][7F][22][14] Response too long
+TX: [02][22][F1][86]          →  RX: [04][62][F1][86][01]   Default session
+TX: [04][22][F1][86][F1][93]  →  RX: [03][7F][22][14]       Response too long
 ```
 
 ---
 
 ### NRC Response Example
 ![NRC](images/NRC.PNG)
+
 ---
+
+## NRC Table
+
+| Code | Name |
+|---|---|
+| 0x11 | ServiceNotSupported |
+| 0x12 | SubFunctionNotSupported |
+| 0x13 | IncorrectMessageLength |
+| 0x14 | ResponseTooLong |
+| 0x22 | ConditionNotCorrect |
+| 0x24 | RequestSequenceError |
+| 0x31 | RequestOutOfRange |
+| 0x33 | SecurityAccessDenied |
+| 0x35 | InvalidKey |
+| 0x36 | ExceededNumberOfAttempts |
+| 0x37 | RequiredTimeDelayNotExpired |
+
+---
+
+## Python Host Terminal
 
 ### Frame Builder
 
@@ -130,6 +154,7 @@ def build_frame(payload):
 ```
 
 ---
+
 ## Known Limitations
 
 - Frame max = 8 bytes (padding 0xAA)
@@ -141,5 +166,5 @@ def build_frame(payload):
 
 ## Author
 
-ARNOUZ SAID — 2026
+ARNOUZ SAID — 2026  
 EMBEDDED ENGINEER
