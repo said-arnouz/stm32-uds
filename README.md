@@ -92,13 +92,6 @@ TX: [02][11][01]  →  RX: [03][7F][11][22]   flag == false
 uint8_t key = seed_H ^ seed_L;
 ```
 
-**Python calculation:**
-```python
-seed_H = rx_bytes[2]
-seed_L = rx_bytes[3]
-key = seed_H ^ seed_L
-```
-
 ---
 
 ### 0x22 — ReadDataByIdentifier
@@ -119,25 +112,6 @@ TX: [04][22][F1][86][F1][93]  →  RX: [03][7F][22][14]       Response too long
 
 ### NRC Response Example
 ![NRC](images/NRC.PNG)
-
----
-
-## NRC Table
-
-| Code | Name |
-|---|---|
-| 0x11 | ServiceNotSupported |
-| 0x12 | SubFunctionNotSupported |
-| 0x13 | IncorrectMessageLength |
-| 0x14 | ResponseTooLong |
-| 0x22 | ConditionNotCorrect |
-| 0x24 | RequestSequenceError |
-| 0x31 | RequestOutOfRange |
-| 0x33 | SecurityAccessDenied |
-| 0x35 | InvalidKey |
-| 0x36 | ExceededNumberOfAttempts |
-| 0x37 | RequiredTimeDelayNotExpired |
-
 ---
 
 ## Python Host Terminal
