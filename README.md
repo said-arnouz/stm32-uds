@@ -4,8 +4,19 @@
 
 ---
 
-### Python Host Terminal
-![HOST](images/HOST.PNG)
+### Python Host Terminal — UI
+
+![UI](images/test.PNG)
+
+> Interface allows sending raw UDS frames via UART. Each frame is color-coded by byte type (PCI, SID, DID, PAYLOAD, PADDING). Responses from ECU appear automatically via background reader thread.
+
+---
+
+### Erase Memory Test — 0x31 01 FF 00
+
+![ERASE](images/TEST_ERASE.PNG)
+
+> RoutineControl StartRoutine with RID=0xFF00 triggers flash erase. ECU responds with positive response `[71][01][FF][00]` if session and security conditions are met.
 
 ---
 
@@ -108,6 +119,16 @@ TX: [02][22][F1][86]          →  RX: [04][62][F1][86][01]   Default session
 TX: [04][22][F1][86][F1][93]  →  RX: [03][7F][22][14]       Response too long
 ```
 
+### 0x31 — RoutineControl
+
+| SUB | Name | Condition |
+|---|---|---|
+| 0x01 | StartRoutine | ProgrammingSession + sec_unlocked |
+
+| RID | Name | Description |
+|---|---|---|
+| 0xFF00 | EraseMemory | Erase flash before download |
+| 0xFF02 | CheckProgramming | Verify programmed data integrity |
 ---
 
 ### NRC Response Example

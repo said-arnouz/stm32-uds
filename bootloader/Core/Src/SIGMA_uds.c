@@ -1,6 +1,6 @@
 /**
  * @file    SIGMA_uds.c
- * @brief   UDS (Unified Diagnostic Services) implementation for STM32 bootloader.
+ * @brief   UDS (Unified Diagnostic Services) implementation for STM32.
  *          Handles UART frame reception and dispatches to service handlers:
  *            - SID 0x10 : DiagnosticSessionControl
  *            - SID 0x11 : ECUReset
@@ -11,6 +11,7 @@
  */
 
 #include "SIGMA_uds.h"
+#include "SIGMA_flash.h"
 
 /*
  * Security state — private to this file
@@ -54,9 +55,6 @@ void SIGMA_UART_Send(uint8_t *tx_buf, uint8_t len)
 void SIGMA_UDS_Process(uint8_t *frame, uint8_t *tx_buf)
 {
     /*1. Receive frame*/
-    if (HAL_UART_Receive(&huart2, frame, 8, 1000) != HAL_OK)
-        return;
-
     uint8_t len  = frame[0];
     uint8_t sid  = frame[1];
     uint8_t sub  = frame[2];
@@ -101,6 +99,10 @@ void SIGMA_UDS_Process(uint8_t *frame, uint8_t *tx_buf)
         }
         uint16_t did = ((uint16_t)sub << 8) | data;
         SIGMA_READ_DID(len, did, tx_buf);
+    }
+    else if (sid == SID_ROUTINE_CONTROL)
+    {
+        SIGMA_RoutineControl(len, sub, data, frame[4], sid, tx_buf);
     }
     else
     {
@@ -487,3 +489,92 @@ void SIGMA_READ_DID(uint8_t length, uint16_t did, uint8_t *tx_buf)
             break;
     }
 }
+/*
+ * SIGMA_RoutineControl
+ */
+
+/**
+ * @brief  SID 0x31 — RoutineControl.
+ * @details Only accessible in PROGRAMMING_SESSION.
+ *          Frame : [LEN][31][SUB][RID_H][RID_L]
+ *          len must be 4 (SID + SUB + RID_H + RID_L).
+ */
+void SIGMA_RoutineControl(uint8_t len, uint8_t sub,
+                          uint8_t rid_H, uint8_t rid_L,
+                          uint8_t sid, uint8_t *tx_buf)
+{
+    memset(tx_buf, 0xAA, 8);
+
+    /* Length check — LEN must be 4 */
+    if (len != 4)
+    {
+        tx_buf[0] = 0x03;
+        tx_buf[1] = NRC;
+        tx_buf[2] = sid;
+        tx_buf[3] = NRC_INCORRECT_MESSAGE_LENGTH;
+        SIGMA_UART_Send(tx_buf, 8);
+        return;
+    }
+    /* Session check */
+    if (Ecu_session != PROGRAMMING_SESSION)
+    {
+        tx_buf[0] = 0x03;
+        tx_buf[1] = NRC;
+        tx_buf[2] = sid;
+        tx_buf[3] = NRC_SERVICE_NOT_SUPPORTED;
+        SIGMA_UART_Send(tx_buf, 8);
+        return;
+    }
+    /* SUB check */
+    if (sub != START_ROUTINE)
+    {
+        tx_buf[0] = 0x03;
+        tx_buf[1] = NRC;
+        tx_buf[2] = sid;
+        tx_buf[3] = NRC_SUBFUNCTION_NOT_SUPPORTED;
+        SIGMA_UART_Send(tx_buf, 8);
+        return;
+    }
+
+    uint16_t rid = ((uint16_t)rid_H << 8) | rid_L;
+
+    switch (rid)
+    {
+        case ROUTINE_ERASE_MEMORY:
+            	if(SIGMA_Flash_Erase(APP_ADDRESS) != FLASH_OK)
+            	{
+                    tx_buf[0] = 0x03;
+                    tx_buf[1] = NRC;
+                    tx_buf[2] = SID_ROUTINE_CONTROL;
+                    tx_buf[3] = NRC_GENERAL_PRGRAMMING_FAILURE;
+                    SIGMA_UART_Send(tx_buf, 8);
+            	}
+            	else
+            	{
+                    tx_buf[0] = 0x04;
+                    tx_buf[1] = SID_ROUTINE_CONTROL + POS; /* 0x71 */
+                    tx_buf[2] = START_ROUTINE;
+                    tx_buf[3] = rid_H;
+                    tx_buf[4] = rid_L;
+                    SIGMA_UART_Send(tx_buf, 8);
+            	}
+            break;
+
+        case ROUTINE_CHECK_INTEGRITY:
+            	tx_buf[0] = 0x04;
+                tx_buf[1] = SID_ROUTINE_CONTROL + POS;
+                tx_buf[2] = START_ROUTINE;
+                tx_buf[3] = rid_H;
+                tx_buf[4] = rid_L;
+                SIGMA_UART_Send(tx_buf, 8);
+                break;
+        default:
+            tx_buf[0] = 0x03;
+            tx_buf[1] = NRC;
+            tx_buf[2] = sid;
+            tx_buf[3] = NRC_REQUEST_OUT_OF_RANG;
+            SIGMA_UART_Send(tx_buf, 8);
+            break;
+    }
+}
+

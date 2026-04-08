@@ -1,10 +1,10 @@
-22:58:14 **** Incremental Build of configuration Debug for project SIGMA_UDS ****
+12:28:20 **** Incremental Build of configuration Debug for project SIGMA_UDS ****
 make -j8 all 
 arm-none-eabi-size   SIGMA_UDS.elf 
    text	   data	    bss	    dec	    hex	filename
-  12816	     24	   1672	  14512	   38b0	SIGMA_UDS.elf
+  14596	     24	   1704	  16324	   3fc4	SIGMA_UDS.elf
 Finished building: default.size.stdout
  
 
-22:58:14 Build Finished. 0 errors, 0 warnings. (took 534ms)
+12:28:21 Build Finished. 0 errors, 0 warnings. (took 581ms)
 

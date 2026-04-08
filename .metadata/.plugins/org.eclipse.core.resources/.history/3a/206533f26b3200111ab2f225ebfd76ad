@@ -1,0 +1,25 @@
+/*
+ * SIGMA_flash.h
+ *
+ *  Created on: Apr 7, 2026
+ *      Author: HP
+ */
+
+#ifndef INC_SIGMA_FLASH_H_
+#define INC_SIGMA_FLASH_H_
+
+/**
+ * @brief  Erases all flash sectors from start_address to end of flash.
+ * @details Unlocks flash, performs sector erase from the sector containing
+ *          start_address up to SECTOR_7 (inclusive), then re-locks flash.
+ *          Typically called before writing new firmware in bootloader context.
+ * @param  start_address : first address to erase (sector-aligned recommended).
+ * @return FLASH_OK    : erase successful.
+ *         FLASH_ERROR : HAL erase failed (sector_error indicates failing sector).
+ */
+FLASH_Status_t SIGMA_Flash_Erase(uint32_t start_address);
+
+
+
+
+#endif /* INC_SIGMA_FLASH_H_ */

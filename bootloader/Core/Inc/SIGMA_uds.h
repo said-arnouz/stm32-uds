@@ -1,6 +1,6 @@
 /**
  * @file    SIGMA_uds.h
- * @brief   UDS (Unified Diagnostic Services) layer for STM32 bootloader.
+ * @brief   UDS (Unified Diagnostic Services) layer for STM32.
  *          Provides DiagnosticSessionControl, ECUReset, SecurityAccess,
  *          and ReadDataByIdentifier services over UART (ISO 14229).
  * @author  ARNOUZ SAID
@@ -10,21 +10,23 @@
 #ifndef SIGMA_UDS_H
 #define SIGMA_UDS_H
 
-#include "main.h"
 #include "stdbool.h"
 #include "string.h"
+#include "main.h"
 
 /*
  * Security timing
  */
 #define SEC_TIMEOUT_MS                      60000U
 #define SEC_MAX_ATTEMPTS                    3
-
+/*
+ * Application Start Address
+ */
+#define APP_ADDRESS                      	0x08020000UL
 /*
  * Positive response offset
  */
 #define POS                                 0x40
-
 /*
  * NRC — Negative Response Codes
  */
@@ -41,6 +43,7 @@
 #define NRC_INVALID_KEY                     0x35
 #define NRC_EXCEEDED_NUMBERS_OF_ATTEMPTS    0x36
 #define NRC_REQUIRED_TIME_DELAY_NOT_EXPIRED 0x37
+#define NRC_GENERAL_PRGRAMMING_FAILURE		0x72
 
 /*
  * SID 0x10 — DiagnosticSessionControl
@@ -74,6 +77,14 @@
 #define DID_ECU_SESSION                     0xF186
 
 /*
+ * SID 0x31 — RoutineControl
+ */
+#define SID_ROUTINE_CONTROL                 0x31
+#define START_ROUTINE                 		0x01
+#define STOP_ROUTINE	                  	0x02 // maghadich nakhdam bih
+#define ROUTINE_ERASE_MEMORY               	0xFF00
+#define ROUTINE_CHECK_INTEGRITY				0xFF01
+/*
  * External variables (defined in main.c)
  */
 extern UART_HandleTypeDef  huart2;
@@ -82,10 +93,7 @@ extern uint8_t             speed;
 extern uint8_t             temp;
 extern bool                flag;
 
-/*
- * Function prototypes
- */
-
+/*Function prototypes*/
 /**
  * @brief  Sends a UDS frame over UART.
  * @param  tx_buf : pointer to the 8-byte frame buffer.
@@ -147,5 +155,18 @@ void SIGMA_SecurityAccess(uint8_t length, uint8_t sub, uint8_t key, uint8_t *tx_
  * @param  tx_buf : pointer to the transmit buffer.
  */
 void SIGMA_READ_DID(uint8_t length, uint16_t did, uint8_t *tx_buf);
+
+/**
+ * @brief  SID 0x31 — RoutineControl handler.
+ * @param  len    : payload length.
+ * @param  sub    : START(0x01) / STOP(0x02) / REQUEST_RESULTS(0x03).
+ * @param  rid_H  : Routine ID high byte.
+ * @param  rid_L  : Routine ID low byte.
+ * @param  sid    : service ID for NRC.
+ * @param  tx_buf : transmit buffer.
+ */
+void SIGMA_RoutineControl(uint8_t len, uint8_t sub,
+                          uint8_t rid_H, uint8_t rid_L,
+                          uint8_t sid, uint8_t *tx_buf);
 
 #endif /* SIGMA_UDS_H */
