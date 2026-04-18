@@ -16,9 +16,6 @@
 /*
  * Security state — private to this file
  */
-extern uint8_t speed; // condition for Programing Session shall be 0
-extern uint8_t temp; // condition of read data must be bigger than 10
-
 static uint16_t sec_seed      = 0;
 static bool     sec_seed_sent = false;
 static uint8_t  sec_attempts  = 0;
@@ -58,12 +55,11 @@ void SIGMA_UART_Send(uint8_t *tx_buf, uint8_t len)
 void SIGMA_UDS_Process(uint8_t *frame, uint8_t *tx_buf)
 {
     /*1. Receive frame*/
-    uint8_t len  		= frame[0];
-    uint8_t sid  		= frame[1];
-    uint8_t sub  		= frame[2];
-    uint8_t data 		= frame[3];
-    uint8_t ctrl_param	= frame[4];
-    uint8_t value 		= frame[5];
+    uint8_t len  = frame[0];
+    uint8_t sid  = frame[1];
+    uint8_t sub  = frame[2];
+    uint8_t data = frame[3];
+
     memset(tx_buf, 0xAA, 8);
 
     /*2. Global length guard*/
@@ -110,39 +106,12 @@ void SIGMA_UDS_Process(uint8_t *frame, uint8_t *tx_buf)
     }
     else if (sid == SID_IO_CONTROL)
     {
-        uint16_t ioc_id = ((uint16_t)sub << 8) | data;
-    	SIGMA_IOControl(len, ioc_id, ctrl_param, value, sid,tx_buf);
-    }
-    else if (sid == 0x2E)  // WriteDataByIdentifier
-    {
-        uint16_t did = ((uint16_t)sub << 8) | data;
-
-        if (did == 0x0010)        // speed
-        {
-            speed     = ctrl_param;   // frame[4]
-            tx_buf[0] = 0x03;
-            tx_buf[1] = 0x6E;
-            tx_buf[2] = 0x00;
-            tx_buf[3] = 0x10;
-            SIGMA_UART_Send(tx_buf, 8);
-        }
-        else if (did == 0x0011)   // temp
-        {
-            temp      = (ctrl_param > 80) ? 80 : ctrl_param;
-            tx_buf[0] = 0x03;
-            tx_buf[1] = 0x6E;
-            tx_buf[2] = 0x00;
-            tx_buf[3] = 0x11;
-            SIGMA_UART_Send(tx_buf, 8);
-        }
-        else
-        {
-            tx_buf[0] = 0x03;
-            tx_buf[1] = NRC;
-            tx_buf[2] = sid;
-            tx_buf[3] = NRC_REQUEST_OUT_OF_RANG;
-            SIGMA_UART_Send(tx_buf, 8);
-        }
+    	SIGMA_IOControl(uint8_t  len,
+    	                     uint16_t ioc_id,
+    	                     uint8_t  ctrl_param,
+    	                     uint8_t  value,
+    	                     uint8_t  sid,
+    	                     uint8_t *tx_buf);
     }
     else
     {
@@ -358,9 +327,8 @@ void SIGMA_SecurityAccess(uint8_t length, uint8_t sub, uint8_t key, uint8_t *tx_
 
         tx_buf[0] = 0x03;
         tx_buf[1] = SID_SECURITY + POS; /* 0x67 */
-        tx_buf[2] = REQUEST_SEED;
-        tx_buf[3] = seed_H;
-        tx_buf[4] = seed_L;
+        tx_buf[2] = seed_H;
+        tx_buf[3] = seed_L;
         SIGMA_UART_Send(tx_buf, 8);
     }
     else if (sub == SEND_KEY)

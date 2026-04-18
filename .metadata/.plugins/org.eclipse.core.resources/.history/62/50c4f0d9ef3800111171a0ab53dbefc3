@@ -13,7 +13,6 @@
 #include "stdbool.h"
 #include "string.h"
 #include "main.h"
-#include "SIGMA_io_control.h"
 
 /*
  * Security timing
@@ -85,6 +84,19 @@
 #define STOP_ROUTINE	                  	0x02 // maghadich nakhdam bih
 #define ROUTINE_ERASE_MEMORY               	0xFF00
 #define ROUTINE_CHECK_INTEGRITY				0xFF01
+
+/*
+ * SID 0x2F — Input Output Control By Identifier
+ * This service does not use a sub-function
+ * uses a request-response mechanism for communication
+ *
+ */
+#define DID_INPUT_OUTPUT_CONTROL			0x2F
+#define IO_CTRL_RETURN_TO_ECU				0x00  /* Release — ECU resumes normal control  */
+#define IO_CTRL_RESET_TO_DEFAULT			0x01  /* Force signal to its NVM default value */
+#define IO_CTRL_FREEZE_CURRENT				0x02  /* Lock signal at current live value     */
+#define IO_CTRL_SHORT_TERM_ADJUST			0x03  /* Override with tester-supplied value   */
+
 
 /*
  * External variables (defined in main.c)

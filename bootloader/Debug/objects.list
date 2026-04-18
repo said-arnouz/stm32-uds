@@ -1,3 +1,4 @@
+"Core/Src/SIGMA_IO_Control.o"
 "Core/Src/SIGMA_flash.o"
 "Core/Src/SIGMA_uds.o"
 "Core/Src/main.o"

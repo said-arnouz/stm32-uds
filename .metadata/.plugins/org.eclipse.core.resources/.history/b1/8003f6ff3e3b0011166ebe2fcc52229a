@@ -16,9 +16,6 @@
 /*
  * Security state — private to this file
  */
-extern uint8_t speed; // condition for Programing Session shall be 0
-extern uint8_t temp; // condition of read data must be bigger than 10
-
 static uint16_t sec_seed      = 0;
 static bool     sec_seed_sent = false;
 static uint8_t  sec_attempts  = 0;
@@ -112,37 +109,6 @@ void SIGMA_UDS_Process(uint8_t *frame, uint8_t *tx_buf)
     {
         uint16_t ioc_id = ((uint16_t)sub << 8) | data;
     	SIGMA_IOControl(len, ioc_id, ctrl_param, value, sid,tx_buf);
-    }
-    else if (sid == 0x2E)  // WriteDataByIdentifier
-    {
-        uint16_t did = ((uint16_t)sub << 8) | data;
-
-        if (did == 0x0010)        // speed
-        {
-            speed     = ctrl_param;   // frame[4]
-            tx_buf[0] = 0x03;
-            tx_buf[1] = 0x6E;
-            tx_buf[2] = 0x00;
-            tx_buf[3] = 0x10;
-            SIGMA_UART_Send(tx_buf, 8);
-        }
-        else if (did == 0x0011)   // temp
-        {
-            temp      = (ctrl_param > 80) ? 80 : ctrl_param;
-            tx_buf[0] = 0x03;
-            tx_buf[1] = 0x6E;
-            tx_buf[2] = 0x00;
-            tx_buf[3] = 0x11;
-            SIGMA_UART_Send(tx_buf, 8);
-        }
-        else
-        {
-            tx_buf[0] = 0x03;
-            tx_buf[1] = NRC;
-            tx_buf[2] = sid;
-            tx_buf[3] = NRC_REQUEST_OUT_OF_RANG;
-            SIGMA_UART_Send(tx_buf, 8);
-        }
     }
     else
     {

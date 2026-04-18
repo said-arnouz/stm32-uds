@@ -1,10 +1,21 @@
-12:28:20 **** Incremental Build of configuration Debug for project SIGMA_UDS ****
+16:55:25 **** Build of configuration Debug for project SIGMA_UDS ****
 make -j8 all 
+arm-none-eabi-gcc "../Core/Src/SIGMA_IO_Control.c" -mcpu=cortex-m4 -std=gnu11 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32F411xE -c -I../Core/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Drivers/CMSIS/Include -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -MMD -MP -MF"Core/Src/SIGMA_IO_Control.d" -MT"Core/Src/SIGMA_IO_Control.o" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "Core/Src/SIGMA_IO_Control.o"
+arm-none-eabi-gcc "../Core/Src/SIGMA_uds.c" -mcpu=cortex-m4 -std=gnu11 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32F411xE -c -I../Core/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Drivers/CMSIS/Include -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -MMD -MP -MF"Core/Src/SIGMA_uds.d" -MT"Core/Src/SIGMA_uds.o" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "Core/Src/SIGMA_uds.o"
+arm-none-eabi-gcc -o "SIGMA_UDS.elf" @"objects.list"   -mcpu=cortex-m4 -T"C:\Users\HP\Documents\work_space\UDS\bootloader\STM32F411RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="SIGMA_UDS.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+Finished building target: SIGMA_UDS.elf
+ 
+arm-none-eabi-objdump -h -S  SIGMA_UDS.elf  > "SIGMA_UDS.list"
+arm-none-eabi-objcopy  -O binary  SIGMA_UDS.elf  "SIGMA_UDS.bin"
 arm-none-eabi-size   SIGMA_UDS.elf 
    text	   data	    bss	    dec	    hex	filename
-  14596	     24	   1704	  16324	   3fc4	SIGMA_UDS.elf
+  16420	     24	   1712	  18156	   46ec	SIGMA_UDS.elf
 Finished building: default.size.stdout
+Finished building: SIGMA_UDS.list
+ 
+ 
+Finished building: SIGMA_UDS.bin
  
 
-12:28:21 Build Finished. 0 errors, 0 warnings. (took 581ms)
+16:55:36 Build Finished. 0 errors, 0 warnings. (took 10s.406ms)
 

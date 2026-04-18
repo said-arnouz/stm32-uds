@@ -1,0 +1,8 @@
+SIGMA_IO_Control.c:65:22:_LED_ReadCurrent	8	static
+SIGMA_IO_Control.c:73:16:_Buzzer_ReadCurrent	16	static
+SIGMA_IO_Control.c:83:16:_Fan_ReadCurrent	16	static
+SIGMA_IO_Control.c:93:22:_Relay_ReadCurrent	8	static
+SIGMA_IO_Control.c:101:13:_Buzzer_SetDuty	16	static
+SIGMA_IO_Control.c:110:13:_Fan_SetDuty	16	static
+SIGMA_IO_Control.c:131:6:SIGMA_IOControl	24	static
+SIGMA_IO_Control.c:354:6:SIGMA_IOControl_Tick	16	static
