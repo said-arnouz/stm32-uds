@@ -120,12 +120,8 @@ def describe_frame(frame: bytes, sender: str):
     is_resp = (0x40 <= sid < 0x80) or sid == 0x7F
 
     if sid in (0x2F, 0x6F):
-        ioc_id = (frame[2] << 8 | frame[3]) if len(frame) > 3 else 0
         ctrl   = frame[4] if len(frame) > 4 else 0
-        val    = frame[5] if len(frame) > 5 and frame[5] != PAD_BYTE else None
-        id_n   = IOC_ID_NAMES.get(ioc_id, f"0x{ioc_id:04X}")
-        ct_n   = IOC_CTRL_NAMES.get(ctrl, f"0x{ctrl:02X}")
-        det    = f"{id_n}  {ct_n}" + (f"  val=0x{val:02X}" if val is not None else "")
+        det   = IOC_CTRL_NAMES.get(ctrl, f"0x{ctrl:02X}")
     elif sid == 0x7F:
         nrc = frame[3] if len(frame) > 3 else 0
         det = NRC_NAMES.get(nrc, f"0x{nrc:02X}")

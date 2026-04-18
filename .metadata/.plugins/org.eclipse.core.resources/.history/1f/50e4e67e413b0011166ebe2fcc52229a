@@ -16,6 +16,9 @@
 /*
  * Security state — private to this file
  */
+extern uint8_t speed; // condition for Programing Session shall be 0
+extern uint8_t temp; // condition of read data must be bigger than 10
+
 static uint16_t sec_seed      = 0;
 static bool     sec_seed_sent = false;
 static uint8_t  sec_attempts  = 0;

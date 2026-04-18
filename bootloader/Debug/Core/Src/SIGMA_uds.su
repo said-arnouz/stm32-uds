@@ -1,8 +1,8 @@
 core_cm4.h:1939:34:__NVIC_SystemReset	4	static,ignoring_inline_asm
-SIGMA_uds.c:38:6:SIGMA_UART_Send	16	static
-SIGMA_uds.c:58:6:SIGMA_UDS_Process	48	static
-SIGMA_uds.c:172:6:SIGMA_DiagSession	16	static
-SIGMA_uds.c:244:6:SIGMA_ECUReset	16	static
-SIGMA_uds.c:322:6:SIGMA_SecurityAccess	24	static
-SIGMA_uds.c:452:6:SIGMA_READ_DID	16	static
-SIGMA_uds.c:543:6:SIGMA_RoutineControl	32	static
+SIGMA_uds.c:35:6:SIGMA_UART_Send	16	static
+SIGMA_uds.c:55:6:SIGMA_UDS_Process	48	static
+SIGMA_uds.c:138:6:SIGMA_DiagSession	16	static
+SIGMA_uds.c:210:6:SIGMA_ECUReset	16	static
+SIGMA_uds.c:288:6:SIGMA_SecurityAccess	24	static
+SIGMA_uds.c:418:6:SIGMA_READ_DID	16	static
+SIGMA_uds.c:509:6:SIGMA_RoutineControl	32	static
