@@ -1,8 +1,0 @@
-SIGMA_flash_if.c:19:17:Flash_GetSector	16	static
-SIGMA_flash_if.c:32:10:UART_ReadExact	32	static
-SIGMA_flash_if.c:42:6:UART_Send	16	static
-SIGMA_flash_if.c:48:16:Flash_Erase	56	static
-SIGMA_flash_if.c:74:16:Flash_Write	40	static
-SIGMA_flash_if.c:102:16:Flash_Read	32	static
-SIGMA_flash_if.c:115:6:Boot_JumpToApplication	32	static,ignoring_inline_asm
-SIGMA_flash_if.c:135:10:stm32_crc32_sw	56	static

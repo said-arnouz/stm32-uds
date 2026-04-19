@@ -1,7 +1,7 @@
 LaunchTargetManager/org.eclipse.launchbar.core.launchTargetType.local,Local/arch=x86_64
 LaunchTargetManager/org.eclipse.launchbar.core.launchTargetType.local,Local/name=Local
 LaunchTargetManager/org.eclipse.launchbar.core.launchTargetType.local,Local/os=win32
-configDescList=org.eclipse.cdt.dsf.gdb.gdbRemotedescriptorType\:SIGMA_bootloader Debug,org.eclipse.cdt.dsf.gdb.gdbRemotedescriptorType\:bootloader,org.eclipse.cdt.dsf.gdb.gdbRemotedescriptorType\:SIGMA_UDS Debug
+configDescList=
 eclipse.preferences.version=1
 org.eclipse.cdt.dsf.gdb.gdbRemotedescriptorType\:AZURE_ThreadX/activeLaunchMode=run
 org.eclipse.cdt.dsf.gdb.gdbRemotedescriptorType\:AZURE_ThreadX/activeLaunchTarget=null\:---
